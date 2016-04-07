@@ -68,6 +68,12 @@ func action(c *cli.Context) {
 		return
 	}
 
+	if !filepath.IsAbs(src) {
+		if src, err = filepath.Abs(src); err != nil {
+			return
+		}
+	}
+
 	dst := c.String("dst")
 	if dst == "" {
 		err = fmt.Errorf("%s", "arg of dst could not be empty")
