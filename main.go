@@ -14,14 +14,24 @@ import (
 
 var (
 	imageEigenvalue = map[string][]byte{}
+	extMime         = map[string]string{}
 )
 
 func init() {
 	imageEigenvalue = map[string][]byte{
 		".jpeg": []byte{0xFF, 0xD8},
+		".jpg":  []byte{0xFF, 0xD8},
 		".png":  []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A},
 		".gif":  []byte{0x47, 0x49, 0x46},
 		".bmp":  []byte{0x42, 0x4D},
+	}
+
+	extMime = map[string]string{
+		".jpeg": "jpeg",
+		".jpg":  "jpeg",
+		".png":  "png",
+		".gif":  "gif",
+		".bmp":  "bmp",
 	}
 
 }
@@ -145,7 +155,13 @@ func genreate(src, dst, tpl string) (err error) {
 
 		b64 := base64.StdEncoding.EncodeToString(fileData)
 
-		data := fmt.Sprintf("data:image/%s;base64,%s", strings.TrimLeft(ext, "."), b64)
+		mime := ""
+		if mime, exist = extMime[ext]; !exist {
+			err = fmt.Errorf("mime not exist")
+			return
+		}
+
+		data := fmt.Sprintf("data:image/%s;base64,%s", mime, b64)
 
 		createMap[relPath] = data
 
