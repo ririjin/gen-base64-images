@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/codegangsta/cli"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/urfave/cli"
 )
 
 var (
@@ -59,17 +60,15 @@ func main() {
 		},
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+
+	if err != nil {
+		fmt.Println("gen-base64-images: %s\n", err.Error())
+		os.Exit(1)
+	}
 }
 
-func action(c *cli.Context) {
-	var err error
-	defer func() {
-		if err != nil {
-			fmt.Printf("gen-base64-images: %s\n", err.Error())
-			return
-		}
-	}()
+func action(c *cli.Context) (err error) {
 
 	src := c.String("src")
 
@@ -102,6 +101,7 @@ func action(c *cli.Context) {
 		return
 	}
 
+	return
 }
 
 func genreate(src, dst, tpl string) (err error) {
@@ -130,6 +130,9 @@ func genreate(src, dst, tpl string) (err error) {
 		if relPath, err = filepath.Rel(src, path); err != nil {
 			return
 		}
+
+		relPathExt := filepath.Ext(relPath)
+		relPath = strings.TrimSuffix(relPath, relPathExt) + strings.Replace(relPathExt, ".", "_", 1)
 
 		ext := filepath.Ext(path)
 		var eigenvalue []byte
